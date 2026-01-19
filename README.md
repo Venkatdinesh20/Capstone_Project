@@ -1,6 +1,3 @@
-Here's the README content for your GitHub repository:
-
----
 
 # Credit Risk Scoring System with Temporal Stability Analysis
 
