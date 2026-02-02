@@ -1,0 +1,108 @@
+# .gitignore for Credit Risk Prediction System
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Data files (large datasets)
+*.csv
+*.parquet
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+
+# Keep sample/small files
+!sample_*.csv
+!*_sample.csv
+
+# Model files
+*.model
+*.joblib
+models/*.pkl
+models/*.h5
+
+# Outputs
+outputs/figures/*.png
+outputs/figures/*.jpg
+outputs/reports/*.txt
+outputs/reports/*.pdf
+outputs/predictions/*.csv
+!outputs/figures/.gitkeep
+!outputs/reports/.gitkeep
+!outputs/predictions/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Environment variables
+.env
+.env.local
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Test
+.pytest_cache/
+.tox/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Specific to this project
+data/raw/
+data/processed/
+data/external/
