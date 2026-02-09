@@ -27,9 +27,10 @@ OUTPUTS_DIR = ROOT_DIR / "outputs"
 FIGURES_DIR = OUTPUTS_DIR / "figures"
 REPORTS_DIR = OUTPUTS_DIR / "reports"
 PREDICTIONS_DIR = OUTPUTS_DIR / "predictions"
+DATA_PROCESSED_DIR = ROOT_DIR / "data_processed"
 
 # Create directories if they don't exist
-for directory in [MODELS_DIR, FIGURES_DIR, REPORTS_DIR, PREDICTIONS_DIR]:
+for directory in [MODELS_DIR, FIGURES_DIR, REPORTS_DIR, PREDICTIONS_DIR, DATA_PROCESSED_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
 
 # ============================================================================
@@ -122,6 +123,7 @@ LIGHTGBM_PARAMS = {
     'colsample_bytree': 0.8,
     'reg_alpha': 0.1,
     'reg_lambda': 0.1,
+    'is_unbalance': True,  # Handle class imbalance
     'random_state': RANDOM_STATE,
     'n_jobs': -1,
     'verbose': -1
@@ -140,6 +142,7 @@ XGBOOST_PARAMS = {
     'gamma': 0.1,
     'reg_alpha': 0.1,
     'reg_lambda': 1.0,
+    'scale_pos_weight': 30.8,  # Handle class imbalance (ratio of negative to positive)
     'random_state': RANDOM_STATE,
     'n_jobs': -1,
     'verbosity': 0

@@ -23,16 +23,23 @@ logger = logging.getLogger(__name__)
 class DataPreprocessor:
     """Preprocess and clean data."""
     
-    def __init__(self):
-        """Initialize DataPreprocessor."""
+    def __init__(self, missing_threshold: float = MISSING_THRESHOLD):
+        """Initialize DataPreprocessor.
+        
+        Parameters:
+        -----------
+        missing_threshold : float
+            Threshold for dropping columns with too many missing values (default: 0.80)
+        """
+        self.missing_threshold = missing_threshold
         self.imputers = {}
         self.scalers = {}
         self.columns_dropped = []
         self.missing_indicators = {}
-        logger.info("DataPreprocessor initialized")
+        logger.info(f"DataPreprocessor initialized with missing_threshold={missing_threshold}")
     
     
-    def analyze_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
+    def analyze_missing_values(self, df: pd.DataFrame) -> Dict:
         """
         Analyze missing values in the dataset.
         
@@ -42,26 +49,28 @@ class DataPreprocessor:
         
         Returns:
         --------
-        pd.DataFrame : Summary of missing values
+        dict : Summary with total_missing, missing_percentage, high_missing_cols, etc.
         """
-        missing_summary = pd.DataFrame({
-            'column': df.columns,
-            'missing_count': df.isnull().sum().values,
-            'missing_pct': (df.isnull().sum() / len(df) * 100).values,
-            'dtype': df.dtypes.values
-        })
+        total_missing = df.isnull().sum().sum()
+        total_cells = df.shape[0] * df.shape[1]
+        missing_pct = (total_missing / total_cells) * 100
         
-        missing_summary = missing_summary[missing_summary['missing_count'] > 0]
-        missing_summary = missing_summary.sort_values('missing_pct', ascending=False)
+        missing_by_col = df.isnull().sum()
+        high_missing_cols = missing_by_col[missing_by_col / len(df) > self.missing_threshold].index.tolist()
         
-        logger.info(f"Found {len(missing_summary)} columns with missing values")
-        logger.info(f"Total missing values: {missing_summary['missing_count'].sum():,}")
+        logger.info(f"Total missing values: {total_missing:,} ({missing_pct:.2f}%)")
+        logger.info(f"Columns with >{self.missing_threshold*100}% missing: {len(high_missing_cols)}")
         
-        return missing_summary
+        return {
+            'total_missing': total_missing,
+            'missing_percentage': missing_pct,
+            'total_cols': df.shape[1],
+            'high_missing_cols': high_missing_cols
+        }
     
     
     def drop_high_missing_columns(self, df: pd.DataFrame, 
-                                  threshold: float = MISSING_THRESHOLD) -> pd.DataFrame:
+                                  threshold: float = None) -> pd.DataFrame:
         """
         Drop columns with missing values above threshold.
         
@@ -69,12 +78,16 @@ class DataPreprocessor:
         -----------
         df : pd.DataFrame
         threshold : float
-            Drop columns with missing percentage above this (0-1)
+            Drop columns with missing percentage above this (0-1). 
+            If None, uses self.missing_threshold
         
         Returns:
         --------
         pd.DataFrame : DataFrame with high-missing columns removed
         """
+        if threshold is None:
+            threshold = self.missing_threshold
+            
         missing_pct = df.isnull().sum() / len(df)
         cols_to_drop = missing_pct[missing_pct > threshold].index.tolist()
         
@@ -91,7 +104,7 @@ class DataPreprocessor:
     
     def create_missing_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Create binary indicator columns for missing values.
+        Create binary indicator columns for missing values - OPTIMIZED.
         
         Parameters:
         -----------
@@ -104,8 +117,6 @@ class DataPreprocessor:
         if not CREATE_MISSING_INDICATORS:
             return df
         
-        df_with_indicators = df.copy()
-        
         # Find columns with missing values
         cols_with_missing = df.columns[df.isnull().any()].tolist()
         
@@ -113,13 +124,34 @@ class DataPreprocessor:
         cols_with_missing = [col for col in cols_with_missing 
                             if col not in [ID_COL, TARGET_COL]]
         
-        # Create indicators
+        # Limit to columns with moderate missing (not too sparse)
+        # Skip if >50% missing (already dropped) or <5% missing (not useful)
+        useful_cols = []
         for col in cols_with_missing:
+            missing_pct = df[col].isnull().sum() / len(df)
+            if 0.05 <= missing_pct <= 0.50:
+                useful_cols.append(col)
+        
+        if not useful_cols:
+            logger.info("No useful columns for missing indicators")
+            return df
+        
+        # Create all indicators at once using concat (memory efficient)
+        indicator_dfs = []
+        for col in useful_cols:
             indicator_col = f"{col}_missing"
-            df_with_indicators[indicator_col] = df[col].isnull().astype(int)
+            indicator_dfs.append(pd.DataFrame({
+                indicator_col: df[col].isnull().astype('int8')  # Use int8 to save memory
+            }))
             self.missing_indicators[col] = indicator_col
         
-        logger.info(f"Created {len(cols_with_missing)} missing value indicators")
+        # Concatenate all at once
+        if indicator_dfs:
+            indicators_combined = pd.concat(indicator_dfs, axis=1)
+            df_with_indicators = pd.concat([df, indicators_combined], axis=1)
+            logger.info(f"Created {len(useful_cols)} missing value indicators (5-50% missing range)")
+        else:
+            df_with_indicators = df
         
         return df_with_indicators
     
@@ -127,7 +159,7 @@ class DataPreprocessor:
     def impute_missing_values(self, df: pd.DataFrame, 
                              fit: bool = True) -> pd.DataFrame:
         """
-        Impute missing values using specified strategies.
+        Impute missing values using specified strategies - MEMORY OPTIMIZED WITH BATCHING.
         
         Parameters:
         -----------
@@ -139,7 +171,7 @@ class DataPreprocessor:
         --------
         pd.DataFrame : DataFrame with imputed values
         """
-        df_imputed = df.copy()
+        logger.info("Starting imputation (batch processing to save memory)...")
         
         # Separate numerical and categorical columns
         num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
@@ -149,41 +181,59 @@ class DataPreprocessor:
         num_cols = [col for col in num_cols if col not in [ID_COL, TARGET_COL]]
         cat_cols = [col for col in cat_cols if col not in [ID_COL, TARGET_COL]]
         
-        # Impute numerical columns
-        if num_cols:
-            if fit:
-                self.imputers['numerical'] = SimpleImputer(
-                    strategy=NUMERICAL_IMPUTE_STRATEGY
-                )
-                df_imputed[num_cols] = self.imputers['numerical'].fit_transform(
-                    df_imputed[num_cols]
-                )
-                logger.info(f"Fitted and imputed {len(num_cols)} numerical columns")
-            else:
-                if 'numerical' in self.imputers:
-                    df_imputed[num_cols] = self.imputers['numerical'].transform(
-                        df_imputed[num_cols]
-                    )
-                    logger.info(f"Imputed {len(num_cols)} numerical columns")
+        # Only impute columns with missing values
+        num_cols_with_missing = [col for col in num_cols if df[col].isnull().any()]
+        cat_cols_with_missing = [col for col in cat_cols if df[col].isnull().any()]
         
-        # Impute categorical columns
-        if cat_cols:
-            if fit:
-                self.imputers['categorical'] = SimpleImputer(
-                    strategy=CATEGORICAL_IMPUTE_STRATEGY
-                )
-                df_imputed[cat_cols] = self.imputers['categorical'].fit_transform(
-                    df_imputed[cat_cols]
-                )
-                logger.info(f"Fitted and imputed {len(cat_cols)} categorical columns")
-            else:
-                if 'categorical' in self.imputers:
-                    df_imputed[cat_cols] = self.imputers['categorical'].transform(
-                        df_imputed[cat_cols]
-                    )
-                    logger.info(f"Imputed {len(cat_cols)} categorical columns")
+        logger.info(f"Numerical columns to impute: {len(num_cols_with_missing)}")
+        logger.info(f"Categorical columns to impute: {len(cat_cols_with_missing)}")
         
-        return df_imputed
+        # Impute numerical columns in batches
+        if num_cols_with_missing:
+            batch_size = 50  # Process 50 columns at a time
+            num_batches = (len(num_cols_with_missing) + batch_size - 1) // batch_size
+            
+            for i in range(num_batches):
+                start_idx = i * batch_size
+                end_idx = min((i + 1) * batch_size, len(num_cols_with_missing))
+                batch_cols = num_cols_with_missing[start_idx:end_idx]
+                
+                logger.info(f"Processing numerical batch {i+1}/{num_batches} ({len(batch_cols)} columns)")
+                
+                if fit:
+                    imputer = SimpleImputer(strategy=NUMERICAL_IMPUTE_STRATEGY)
+                    df[batch_cols] = imputer.fit_transform(df[batch_cols])
+                    self.imputers[f'numerical_batch_{i}'] = imputer
+                else:
+                    if f'numerical_batch_{i}' in self.imputers:
+                        df[batch_cols] = self.imputers[f'numerical_batch_{i}'].transform(df[batch_cols])
+            
+            logger.info(f"✓ Imputed all {len(num_cols_with_missing)} numerical columns")
+        
+        # Impute categorical columns in batches
+        if cat_cols_with_missing:
+            batch_size = 20  # Smaller batch for categorical
+            num_batches = (len(cat_cols_with_missing) + batch_size - 1) // batch_size
+            
+            for i in range(num_batches):
+                start_idx = i * batch_size
+                end_idx = min((i + 1) * batch_size, len(cat_cols_with_missing))
+                batch_cols = cat_cols_with_missing[start_idx:end_idx]
+                
+                logger.info(f"Processing categorical batch {i+1}/{num_batches} ({len(batch_cols)} columns)")
+                
+                if fit:
+                    imputer = SimpleImputer(strategy=CATEGORICAL_IMPUTE_STRATEGY)
+                    df[batch_cols] = imputer.fit_transform(df[batch_cols])
+                    self.imputers[f'categorical_batch_{i}'] = imputer
+                else:
+                    if f'categorical_batch_{i}' in self.imputers:
+                        df[batch_cols] = self.imputers[f'categorical_batch_{i}'].transform(df[batch_cols])
+            
+            logger.info(f"✓ Imputed all {len(cat_cols_with_missing)} categorical columns")
+        
+        logger.info("Imputation complete")
+        return df
     
     
     def detect_outliers(self, df: pd.DataFrame, method: str = 'iqr', 
