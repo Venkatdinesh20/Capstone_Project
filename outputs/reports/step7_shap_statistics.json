@@ -1,0 +1,110 @@
+{
+  "total_samples_analyzed": 1000,
+  "total_features": 727,
+  "base_value": -0.8089749833605997,
+  "mean_prediction": 0.3612932800654193,
+  "top_20_features": [
+    {
+      "feature": "education_1103M_6b2ae0fa",
+      "importance": 0.14781091244396113,
+      "importance_pct": 3.511247066571172
+    },
+    {
+      "feature": "WEEK_NUM",
+      "importance": 0.1475822062986901,
+      "importance_pct": 3.505814153882847
+    },
+    {
+      "feature": "mobilephncnt_593L",
+      "importance": 0.12191050006716747,
+      "importance_pct": 2.895982973566678
+    },
+    {
+      "feature": "pctinstlsallpaidlate1d_3546856L",
+      "importance": 0.10842784686882495,
+      "importance_pct": 2.5757026525164664
+    },
+    {
+      "feature": "homephncnt_628L",
+      "importance": 0.10255341463251495,
+      "importance_pct": 2.4361555607864513
+    },
+    {
+      "feature": "pmtnum_254L",
+      "importance": 0.0858799835453546,
+      "importance_pct": 2.0400783359965424
+    },
+    {
+      "feature": "lastrejectreason_759M_a55475b1",
+      "importance": 0.07672160422193265,
+      "importance_pct": 1.8225211069516096
+    },
+    {
+      "feature": "pmtssum_45A",
+      "importance": 0.07534565165590064,
+      "importance_pct": 1.7898353645301717
+    },
+    {
+      "feature": "days90_310L",
+      "importance": 0.07325596361745154,
+      "importance_pct": 1.7401948415556923
+    },
+    {
+      "feature": "pmtscount_423L",
+      "importance": 0.07223621337935573,
+      "importance_pct": 1.7159706826424819
+    },
+    {
+      "feature": "annuity_780A",
+      "importance": 0.07055178992994449,
+      "importance_pct": 1.6759572168041508
+    },
+    {
+      "feature": "MONTH",
+      "importance": 0.06667691786669538,
+      "importance_pct": 1.5839096613127372
+    },
+    {
+      "feature": "thirdquarter_1082L",
+      "importance": 0.06648000118985875,
+      "importance_pct": 1.5792319071979068
+    },
+    {
+      "feature": "lastst_736L_K",
+      "importance": 0.06588826279097108,
+      "importance_pct": 1.5651751661703486
+    },
+    {
+      "feature": "eir_270L",
+      "importance": 0.06541327171792027,
+      "importance_pct": 1.5538917569529849
+    },
+    {
+      "feature": "days120_123L",
+      "importance": 0.06403395499862989,
+      "importance_pct": 1.5211260990972628
+    },
+    {
+      "feature": "avgdpdtolclosure24_3658938P",
+      "importance": 0.06270767517366813,
+      "importance_pct": 1.489620332250616
+    },
+    {
+      "feature": "requesttype_4525192L_PENSION_6",
+      "importance": 0.060748989211874785,
+      "importance_pct": 1.4430917625803057
+    },
+    {
+      "feature": "totalsettled_863A",
+      "importance": 0.05860446220765573,
+      "importance_pct": 1.3921485404037859
+    },
+    {
+      "feature": "pctinstlsallpaidlate1d_3546856L_static_0_1",
+      "importance": 0.05757003709122823,
+      "importance_pct": 1.3675757798708272
+    }
+  ],
+  "top_20_cumulative_importance_pct": 39.20523096164105,
+  "analysis_date": "2026-03-12 12:36:49"
+}

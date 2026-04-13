@@ -1,0 +1,21 @@
+{
+  "visualization_date": "2026-03-12 12:39:48",
+  "test_set_size": 228999,
+  "default_rate": 0.03143681850139084,
+  "models_evaluated": [
+    "LightGBM",
+    "Logistic Regression"
+  ],
+  "visualizations_created": [
+    "ROC Curves",
+    "Precision-Recall Curves",
+    "Confusion Matrix",
+    "Prediction Distribution",
+    "Calibration Curve",
+    "Model Comparison",
+    "Feature Importance",
+    "Class Distribution"
+  ],
+  "best_model": "LightGBM",
+  "best_model_auc": 0.8030030511576663
+}

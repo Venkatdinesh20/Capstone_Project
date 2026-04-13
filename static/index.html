@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreditAI — Credit Risk Prediction</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏦</text></svg>" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══════════════════════════════════════════
+       TOP BAR
+  ══════════════════════════════════════════ -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo-svg">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="36" height="36" rx="9" fill="url(#tg)"/>
+          <path d="M7 15h22M10 11l8-4 8 4M10 15v10h16V15" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M15 25v-5h6v5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+          <defs><linearGradient id="tg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse"><stop stop-color="#2563EB"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="topbar-title-block">
+        <div class="topbar-title">Credit<span>AI</span></div>
+        <div class="topbar-subtitle">AI-Powered Credit Risk Intelligence Platform</div>
+      </div>
+    </div>
+
+    <div class="topbar-badges">
+      <span class="topbar-badge rag-badge">⚡ RAG Enhanced</span>
+      <span class="topbar-badge">Live Demo</span>
+    </div>
+
+    <div class="topbar-kpis">
+      <div class="topbar-kpi">
+        <div class="topbar-kpi-val">0.803</div>
+        <div class="topbar-kpi-lbl">AUC-ROC</div>
+      </div>
+      <div class="topbar-kpi">
+        <div class="topbar-kpi-val" style="color:#3B82F6;">69.6%</div>
+        <div class="topbar-kpi-lbl">Recall</div>
+      </div>
+      <div class="topbar-kpi">
+        <div class="topbar-kpi-val" style="color:#8B5CF6;">1.5M</div>
+        <div class="topbar-kpi-lbl">Records</div>
+      </div>
+      <div class="topbar-kpi">
+        <div class="topbar-kpi-val" style="color:#F59E0B;">727</div>
+        <div class="topbar-kpi-lbl">Features</div>
+      </div>
+      <div class="topbar-kpi">
+        <div class="topbar-kpi-val" style="color:#EC4899;">68</div>
+        <div class="topbar-kpi-lbl">Tables</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════
+       SIDEBAR
+  ══════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sb-logo-block">
+      <div class="sb-logo-icon">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
+          <rect width="40" height="40" rx="11" fill="url(#sg)"/>
+          <path d="M8 17h24M11 12l9-5 9 5M11 17v11h18V17" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M17 28v-6h6v6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <defs><linearGradient id="sg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse"><stop stop-color="#2563EB"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="sb-logo-name">Credit<span style="color:#7C3AED;">AI</span></div>
+      <div class="sb-logo-sub">Home Credit Default Prediction</div>
+      <div class="sb-logo-tag">v2.0 · RAG Enhanced</div>
+    </div>
+
+    <!-- Quick presets -->
+    <div class="sb-section">⚡ Quick Presets</div>
+    <div class="preset-grid">
+      <button class="preset-btn safe"   id="btn-safe">  ✅ Safe Applicant</button>
+      <button class="preset-btn medium" id="btn-medium">⚠️ Medium Risk</button>
+      <button class="preset-btn high"   id="btn-high">  🚨 High Risk</button>
+    </div>
+
+    <!-- Form -->
+    <form id="applicant-form" onsubmit="return false;">
+
+      <div class="sb-section">📅 Application Context</div>
+
+      <div class="field">
+        <label>Week of Year <span class="range-val" id="week_num_val">26</span></label>
+        <input type="range" id="week_num" min="1" max="52" value="26" />
+      </div>
+
+      <div class="field">
+        <label>Month</label>
+        <select id="month">
+          <option value="1">January</option><option value="2">February</option>
+          <option value="3">March</option><option value="4">April</option>
+          <option value="5">May</option><option value="6" selected>June</option>
+          <option value="7">July</option><option value="8">August</option>
+          <option value="9">September</option><option value="10">October</option>
+          <option value="11">November</option><option value="12">December</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="checkbox-row">
+          <input type="checkbox" id="is_q3" />
+          <span>Q3 Application (Jul–Sep)</span>
+        </div>
+      </div>
+
+      <div class="sb-section">📞 Contact Profile</div>
+
+      <div class="field">
+        <label>Mobile Phones on File</label>
+        <input type="number" id="mobile_phones" min="0" max="10" value="1" />
+      </div>
+
+      <div class="field">
+        <label>Home Phones on File</label>
+        <input type="number" id="home_phones" min="0" max="10" value="1" />
+      </div>
+
+      <div class="sb-section">💳 Loan Details</div>
+
+      <div class="field">
+        <label>Monthly Annuity ($)</label>
+        <input type="number" id="annuity" min="0" max="500000" value="8500" step="500" />
+      </div>
+
+      <div class="field">
+        <label>Scheduled Payments</label>
+        <input type="number" id="num_payments" min="0" max="360" value="36" />
+      </div>
+
+      <div class="field">
+        <label>Historical Payment Count</label>
+        <input type="number" id="payments_count" min="0" max="5000" value="120" />
+      </div>
+
+      <div class="field">
+        <label>Total Payments Sum ($)</label>
+        <input type="number" id="payments_sum" min="0" max="10000000" value="250000" step="5000" />
+      </div>
+
+      <div class="sb-section">⚠️ Risk Indicators</div>
+
+      <div class="field">
+        <label>Late Instalment Rate <span class="range-val" id="late_pct_val">5</span>%</label>
+        <input type="range" id="late_pct" min="0" max="100" value="5" step="0.5" />
+      </div>
+
+      <div class="field">
+        <label>90-Day Past Due (days)</label>
+        <input type="number" id="days90" min="0" max="1000" value="0" />
+      </div>
+
+      <div class="field">
+        <label>Total Settled ($)</label>
+        <input type="number" id="total_settled" min="0" max="10000000" value="200000" step="10000" />
+      </div>
+
+      <div class="field">
+        <label>Effective Interest Rate <span class="range-val" id="eir_val_disp">12</span>%</label>
+        <input type="range" id="eir" min="0" max="100" value="12" step="0.5" />
+      </div>
+
+      <button class="predict-btn" id="predict-btn" type="button">
+        🔍&nbsp; Analyze Credit Risk
+      </button>
+
+    </form>
+  </aside>
+
+  <!-- ══════════════════════════════════════════
+       MAIN
+  ══════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- KPI strip -->
+    <div class="kpi-strip">
+      <div class="kpi-card" style="--kpi-accent:#22C55E;">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-val" style="color:#22C55E;">0.803</div>
+        <div class="kpi-lbl">AUC-ROC Score</div>
+        <div class="kpi-sub">Target ≥ 0.75 · Exceeded ✓</div>
+      </div>
+      <div class="kpi-card" style="--kpi-accent:#3B82F6;">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-val" style="color:#3B82F6;">69.6%</div>
+        <div class="kpi-lbl">Default Recall</div>
+        <div class="kpi-sub">Defaults caught before approval</div>
+      </div>
+      <div class="kpi-card" style="--kpi-accent:#8B5CF6;">
+        <div class="kpi-icon">📁</div>
+        <div class="kpi-val" style="color:#8B5CF6;">1.5M</div>
+        <div class="kpi-lbl">Loan Records</div>
+        <div class="kpi-sub">Training + validation data</div>
+      </div>
+      <div class="kpi-card" style="--kpi-accent:#F59E0B;">
+        <div class="kpi-icon">⚙️</div>
+        <div class="kpi-val" style="color:#F59E0B;">727</div>
+        <div class="kpi-lbl">Features</div>
+        <div class="kpi-sub">Engineered signals</div>
+      </div>
+      <div class="kpi-card" style="--kpi-accent:#EC4899;">
+        <div class="kpi-icon">🗄️</div>
+        <div class="kpi-val" style="color:#EC4899;">68</div>
+        <div class="kpi-lbl">Data Tables</div>
+        <div class="kpi-sub">Merged for full context</div>
+      </div>
+      <div class="kpi-card" style="--kpi-accent:#06B6D4;">
+        <div class="kpi-icon">🤖</div>
+        <div class="kpi-val" style="color:#06B6D4;">RAG</div>
+        <div class="kpi-lbl">AI Explanations</div>
+        <div class="kpi-sub">ChromaDB · 506 docs indexed</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="predict">
+        <span class="tab-icon">🎯</span>
+        <span class="tab-label">Risk Prediction</span>
+      </button>
+      <button class="tab-btn" data-tab="insights">
+        <span class="tab-icon">📊</span>
+        <span class="tab-label">Model Insights</span>
+      </button>
+      <button class="tab-btn" data-tab="about">
+        <span class="tab-icon">ℹ️</span>
+        <span class="tab-label">About Project</span>
+      </button>
+    </div>
+
+    <!-- ── TAB: PREDICTION ───────────────────────────────── -->
+    <div class="tab-panel active" id="tab-predict">
+
+      <!-- Welcome state (shown before first prediction) -->
+      <div id="welcome-panel">
+        <div class="welcome">
+          <div class="welcome-icon">🎯</div>
+          <div class="welcome-title">CreditAI — Intelligent Lending Decisions</div>
+          <div class="welcome-sub">
+            LightGBM · AUC-ROC 0.803 · RAG-powered explanations · 727 features from 68 tables<br/>
+            Select a preset below or configure the sidebar form, then click
+            <strong style="color:#93C5FD;">Analyze Credit Risk</strong>
+          </div>
+          <div class="welcome-profiles">
+            <div class="profile-card" style="border-color:rgba(34,197,94,0.35);">
+              <div class="profile-emoji">✅</div>
+              <div class="profile-title" style="color:#22C55E;">Safe Applicant</div>
+              <div class="profile-desc">Low late payments, strong history, moderate interest rate</div>
+            </div>
+            <div class="profile-card" style="border-color:rgba(245,158,11,0.35);">
+              <div class="profile-emoji">⚠️</div>
+              <div class="profile-title" style="color:#F59E0B;">Medium Risk</div>
+              <div class="profile-desc">Some late payments, moderate delinquency, elevated interest</div>
+            </div>
+            <div class="profile-card" style="border-color:rgba(239,68,68,0.35);">
+              <div class="profile-emoji">🚨</div>
+              <div class="profile-title" style="color:#EF4444;">High Risk</div>
+              <div class="profile-desc">High overdue days, poor payment history, very high interest</div>
+            </div>
+            <div class="profile-card" style="border-color:rgba(6,182,212,0.35);">
+              <div class="profile-emoji">🤖</div>
+              <div class="profile-title" style="color:#06B6D4;">AI Analysis</div>
+              <div class="profile-desc">Every result includes a RAG-powered narrative citing the knowledge base</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result panel (hidden until prediction) -->
+      <div id="result-panel" class="result-grid" style="display:none;">
+
+        <!-- Left: Gauge + banner + progress -->
+        <div>
+          <div class="gauge-wrap">
+            <div class="gauge-title">Default Probability Assessment</div>
+            <div class="gauge-svg-wrap">
+              <svg id="gauge-svg" viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Track drawn by JS (same polar math as fill — guaranteed alignment) -->
+                <path id="gauge-arc-track" fill="rgba(255,255,255,0.06)" />
+                <!-- Fill -->
+                <path id="gauge-arc-fill" fill="#22C55E" />
+                <!-- Labels group -->
+                <g id="gauge-labels"></g>
+                <!-- Needle -->
+                <line id="gauge-needle" stroke-width="3" stroke-linecap="round" />
+                <!-- Center dot -->
+                <circle id="gauge-dot" r="7" />
+              </svg>
+              <div class="gauge-value-text">
+                <div class="gauge-pct" id="gauge-pct">—</div>
+                <div class="gauge-tier" id="gauge-tier">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="risk-banner" id="risk-banner" style="border-color:#22C55E;background:rgba(34,197,94,0.08);">
+            <div class="risk-banner-title" id="risk-title">—</div>
+            <div class="risk-banner-sub"   id="risk-advice">—</div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-lbl">
+              <span>Risk Score</span>
+              <span id="progress-pct">—</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Decisions + breakdown -->
+        <div>
+          <div class="card">
+            <div class="card-title">Loan Decision by Strategy</div>
+            <div class="decision-list" id="decision-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Risk Factor Breakdown</div>
+            <div class="factor-list" id="factor-list"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── AI ANALYSIS PANEL (full-width below result grid) ──────────────── -->
+      <div class="ai-panel" id="ai-panel" style="display:none">
+        <div class="ai-panel-header">
+          <span class="ai-badge">AI</span>
+          <span class="ai-title">RAG-Powered Credit Analysis</span>
+          <span class="ai-sub">Retrieved from credit feature knowledge base · LightGBM + ChromaDB</span>
+          <div class="ai-spinner" id="ai-spinner"></div>
+        </div>
+
+        <div class="ai-body" id="ai-body">
+          <!-- Narrative -->
+          <div class="ai-narrative" id="ai-narrative"></div>
+
+          <!-- Key drivers grid -->
+          <div class="ai-drivers" id="ai-drivers"></div>
+
+          <!-- RAG transparency -->
+          <div class="ai-rag-info" id="ai-rag-info"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── TAB: INSIGHTS ─────────────────────────────────── -->
+    <div class="tab-panel" id="tab-insights">
+      <div class="insights-grid">
+
+        <!-- Left col -->
+        <div>
+          <div class="card">
+            <div class="card-title">Model Performance Comparison</div>
+            <div id="model-comparison"></div>
+            <div style="font-size:0.72rem;color:var(--faint);margin-top:0.6rem;">
+              ✅ LightGBM exceeds AUC target of 0.75 by 7%
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Confusion Matrix · 228,999 Test Samples</div>
+            <div class="cm-grid">
+              <div class="cm-cell" style="background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);">
+                <div class="cm-cell-val" style="color:#22C55E;">166,143</div>
+                <div class="cm-cell-label">True Negatives</div>
+                <div class="cm-cell-sub">Correctly approved</div>
+              </div>
+              <div class="cm-cell" style="background:rgba(239,68,68,0.07);border-color:rgba(239,68,68,0.25);">
+                <div class="cm-cell-val" style="color:#F87171;">55,657</div>
+                <div class="cm-cell-label">False Positives</div>
+                <div class="cm-cell-sub">Over-flagged for review</div>
+              </div>
+              <div class="cm-cell" style="background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.25);">
+                <div class="cm-cell-val" style="color:#FCD34D;">2,190</div>
+                <div class="cm-cell-label">False Negatives</div>
+                <div class="cm-cell-sub">Missed defaults</div>
+              </div>
+              <div class="cm-cell" style="background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);">
+                <div class="cm-cell-val" style="color:#60A5FA;">5,009</div>
+                <div class="cm-cell-label">True Positives</div>
+                <div class="cm-cell-sub">Defaults caught ✓ 70%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right col -->
+        <div>
+          <div class="card">
+            <div class="card-title">Precision / Recall / F1 vs Threshold</div>
+            <canvas id="thresh-canvas" style="width:100%;height:220px;"></canvas>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Top 10 SHAP Feature Importances</div>
+            <div id="shap-bars" class="factor-list"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── TAB: ABOUT ────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-about">
+      <div class="about-grid">
+
+        <!-- Left -->
+        <div>
+          <div class="card">
+            <div class="card-title">🎯 Project Mission</div>
+            <p style="line-height:1.75;font-size:0.9rem;color:#CBD5E0;">
+              Traditional credit scoring systems automatically reject
+              <strong style="color:#93C5FD;">26 million credit-invisible people</strong>
+              — not because they're risky, but because they lack formal credit history.
+              HomeCredit serves these underserved populations using alternative behavioral data.
+            </p>
+            <p style="line-height:1.75;font-size:0.9rem;color:#CBD5E0;margin-top:0.7rem;">
+              Our AI pipeline processes 1.5M loan applications across 32 data tables to deliver
+              a fair, explainable, and high-performance default prediction model —
+              exceeding industry AUC benchmarks by 7%.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🔧 9-Step ML Pipeline</div>
+            <div id="pipeline-steps">
+              <!-- Injected by JS below for DRYness -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div>
+          <div class="card">
+            <div class="card-title">👥 Team — Capstone 2</div>
+            <div id="team-list"></div>
+            <div style="margin-top:0.7rem;padding-top:0.7rem;border-top:1px solid var(--border);font-size:0.8rem;color:var(--faint);line-height:1.8;">
+              � Home Credit Default Prediction<br>
+              📚 Data Analytics — Predictive Analytics<br>
+              📅 April 2026
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">📈 Key Achievements</div>
+            <div id="achievements-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🔌 REST API</div>
+            <p style="font-size:0.83rem;color:#CBD5E0;margin-bottom:0.7rem;">
+              This app is powered by a live FastAPI backend with interactive documentation.
+            </p>
+            <a href="/docs" target="_blank"
+               style="display:inline-block;padding:0.45rem 1rem;background:rgba(37,99,235,0.2);
+                      border:1px solid rgba(37,99,235,0.4);border-radius:8px;
+                      color:#93C5FD;font-size:0.82rem;font-weight:600;text-decoration:none;">
+              📖 View API Docs →
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════ -->
+  <footer>
+    <div class="footer-left">
+      <span style="font-weight:700;color:#93C5FD;">CreditAI</span>
+      &nbsp;·&nbsp; Home Credit Default Prediction
+      &nbsp;·&nbsp; Capstone 2 · St. Clair College · 2026
+    </div>
+    <div class="footer-center">
+      <span class="footer-chip">LightGBM</span>
+      <span class="footer-chip">ChromaDB RAG</span>
+      <span class="footer-chip">FastAPI</span>
+      <span class="footer-chip">AUC 0.803</span>
+    </div>
+    <span class="footer-right">📊 Credit Risk Analytics</span>
+  </footer>
+
+</div><!-- .app-shell -->
+
+<!-- Loading spinner -->
+<div class="spinner-overlay" id="spinner">
+  <div class="spinner"></div>
+  <div class="spinner-text">Analyzing applicant profile…</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Inline page data (About tab) -->
+<script>
+  // Pipeline steps
+  const PIPELINE = [
+    ["1","Data Collection",    "1.5M records from 32 parquet tables",          "#3B82F6"],
+    ["2","Data Merging",       "Static + dynamic table join strategy",          "#3B82F6"],
+    ["3","Preprocessing",      "384M missing values — strategic imputation",    "#3B82F6"],
+    ["4","Feature Engineering","727 features, encoded & scaled",                "#3B82F6"],
+    ["5","Model Training",     "LightGBM with class-weighted imbalance",        "#F59E0B"],
+    ["6","Model Evaluation",   "AUC-ROC 0.803, F1, precision, recall",          "#22C55E"],
+    ["7","SHAP Analysis",      "Top-feature attribution per prediction",         "#22C55E"],
+    ["8","Visualizations",     "8 diagnostic charts for transparency",           "#22C55E"],
+    ["9","Threshold Tuning",   "Business cost-benefit threshold optimization",   "#22C55E"],
+  ];
+  const psEl = document.getElementById("pipeline-steps");
+  PIPELINE.forEach(([n,t,d,c]) => {
+    psEl.innerHTML += `
+      <div class="pipeline-step">
+        <div class="step-num" style="background:${c}18;border-color:${c};color:${c};">${n}</div>
+        <div>
+          <div class="step-title">${t}</div>
+          <div class="step-desc">${d}</div>
+        </div>
+      </div>`;
+  });
+
+  // Team
+  const TEAM = ["Venkat Dinesh","Sai Charan","Lokesh Reddy","Pranav Dhara","Sunny"];
+  const teamEl = document.getElementById("team-list");
+  TEAM.forEach(name => {
+    teamEl.innerHTML += `
+      <div class="team-member">
+        <div class="avatar">${name[0]}</div>
+        <span style="font-size:0.9rem;font-weight:500;">${name}</span>
+      </div>`;
+  });
+
+  // Achievements
+  const ACH = [
+    ["AUC-ROC 0.803","Exceeded 0.75 target by 7%",          "#22C55E"],
+    ["70% Recall",   "Defaults caught before approval",       "#3B82F6"],
+    ["727 Features", "From 32 raw data tables",               "#8B5CF6"],
+    ["SHAP Ready",   "Explainable per-prediction reasoning",  "#F59E0B"],
+    ["Cost-Tunable", "Threshold optimizer for business needs","#F59E0B"],
+    ["REST API",     "FastAPI backend with live /docs",        "#22C55E"],
+  ];
+  const achEl = document.getElementById("achievements-list");
+  ACH.forEach(([name,desc,color]) => {
+    achEl.innerHTML += `
+      <div class="achievement">
+        <div class="ach-dot" style="background:${color}"></div>
+        <span class="ach-name">${name}</span>
+        <span class="ach-desc">— ${desc}</span>
+      </div>`;
+  });
+</script>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

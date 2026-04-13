@@ -1,0 +1,77 @@
+{
+  "analysis_date": "2026-03-12 12:53:21",
+  "test_set_size": 228999,
+  "actual_default_rate": 0.03143681850139084,
+  "business_assumptions": {
+    "cost_false_negative": 10000,
+    "cost_false_positive": 500,
+    "cost_true_positive": 1000,
+    "benefit_true_negative": 100
+  },
+  "optimal_thresholds": {
+    "Max F1-Score": {
+      "threshold": 0.7500000000000002,
+      "precision": 0.16114019778941244,
+      "recall": 0.3078205306292541,
+      "f1_score": 0.21154121521645744,
+      "accuracy": 0.9278643138179643,
+      "net_benefit": -36787600.0
+    },
+    "Max Recall (Catch Defaults)": {
+      "threshold": 0.1,
+      "precision": 0.03644800588728306,
+      "recall": 0.9906931518266426,
+      "f1_score": 0.07030930375847197,
+      "accuracy": 0.1763675823911895,
+      "net_benefit": -98748400.0
+    },
+    "Max Precision (Minimize False Alarms)": {
+      "threshold": 0.9000000000000002,
+      "precision": 0.32497911445279865,
+      "recall": 0.05403528267814974,
+      "f1_score": 0.092663172939495,
+      "accuracy": 0.9667334791854987,
+      "net_benefit": -46793800.0
+    },
+    "Max Accuracy": {
+      "threshold": 0.9000000000000002,
+      "precision": 0.32497911445279865,
+      "recall": 0.05403528267814974,
+      "f1_score": 0.092663172939495,
+      "accuracy": 0.9667334791854987,
+      "net_benefit": -46793800.0
+    },
+    "Max Youden's J": {
+      "threshold": 0.45000000000000007,
+      "precision": 0.07381202663000998,
+      "recall": 0.7608001111265453,
+      "f1_score": 0.1345683713959288,
+      "accuracy": 0.6923698356761383,
+      "net_benefit": -41752000.0
+    },
+    "Min Total Cost": {
+      "threshold": 0.6000000000000002,
+      "precision": 0.10769353044031156,
+      "recall": 0.5646617585775802,
+      "f1_score": 0.18088775169651797,
+      "accuracy": 0.8392351058301565,
+      "net_benefit": -33433600.0
+    },
+    "Max Net Benefit": {
+      "threshold": 0.6000000000000002,
+      "precision": 0.10769353044031156,
+      "recall": 0.5646617585775802,
+      "f1_score": 0.18088775169651797,
+      "accuracy": 0.8392351058301565,
+      "net_benefit": -33433600.0
+    }
+  },
+  "recommendation": {
+    "threshold": 0.6000000000000002,
+    "objective": "Minimize Total Business Cost",
+    "expected_net_benefit": -33433600.0,
+    "precision": 0.10769353044031156,
+    "recall": 0.5646617585775802,
+    "f1_score": 0.18088775169651797
+  }
+}
